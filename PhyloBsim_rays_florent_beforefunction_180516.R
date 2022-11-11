@@ -6,7 +6,8 @@ library(betapart)
 library(here)
 #beta part package
 
-#LOAD UP THE TREE FROM CHRIS, THIS HAS 100 trees
+
+# Phylogenetic tree -------------------------------------------------------
 #sharkphy1 <- read.nexus("C:/C.drive/Chapter 4/PhylogenyChris/100.Shark.Tree.nex")
 #class(sharkphy1) #has 100 trees to account for the uncertainty
 #write.tree(sharkphy1, "C:/C.drive/Chapter 4/PhylogenyChris/sharknew")   # newick format
@@ -15,20 +16,15 @@ sharkphy_one<-sample(sharkphy2,size=1)[[1]]
 write.tree(sharkphy_one, "data/sharknew_onetree")   # newick format
 sharkphy <- read.tree("data/sharknew_onetree")
 
-# sharkphy1 <- read.nexus("/home/lnkdavi/100.Shark.Tree.nex")
-# #class(sharkphy1) #has 100 trees to account for the uncertainty
-# write.tree(sharkphy1, "/home/lnkdavi/sharknew")   # newick format
-# sharkphy2 <- read.tree("/home/lnkdavi/sharknew")
-# #subset the database for one tree
-# # sharkphy2
-# # class(sharkphy2)
-# sharkphy<-sample(sharkphy2,size=1)[[1]]
 
+
+# Filter tree -------------------------------------------------------------
 #######################################################################################################
 #NOW THAT I HAVE DEALT WITH THE TREE MOVE ON TO CALCULATIONS,
 #THIS CODE IS SIMILAR TO SPECIESBSIM_DATA.R
 #######################################################################################################
-treehex_unfiltered <- read.csv("data/SJ_Hex4DegChon_rays_forR_171005.csv") #sj file of chon and grid cells, also added the Tree names as IUCN and tree names differ because of spelling and taxonomic changes
+treehex_unfiltered <- read.csv("data/SJ_Hex4DegChon_rays_forR_171005.csv") 
+#spatial join file of chon and grid cells, also added the Tree names as IUCN and tree names differ because of spelling and taxonomic changes
 #treehex_unfiltered <- read.csv("/home/lnkdavi/SJ_HexChond4Deg_withoutIUCNforR_RAYS_171005.csv")
 print(length(unique(treehex_unfiltered$TREEname)))
 head(treehex_unfiltered)
@@ -43,7 +39,8 @@ unique(treehex$TREEvalue)
 print(length(unique(treehex$TREEname))) #542 species??
 print(length(unique(treehex$Unique_ID))) #number of grid cells 6082 grid cells
 
-####get rid of pelagic species
+
+# get rid of pelagic species ----------------------------------------------
 head(treehex)
 treehex2<- filter(treehex, TREEname != "Manta_birostris" )
 print(length(unique(treehex2$TREEname)))
@@ -159,6 +156,8 @@ jobid <- split(cellcombo_grouped, cellcombo_grouped$group)
 
 lapply(names(jobid), function(x){write.csv(jobid[[x]], file = paste0("output/rayscellcombo_", x, ".csv"), row.names=FALSE)})
 
+
+##What does this function do? 
 #and pdcombined, which is the shared
 #i added the cell id values here
 
@@ -167,7 +166,6 @@ lapply(names(jobid), function(x){write.csv(jobid[[x]], file = paste0("output/ray
 # Pdshared = pdsum - pdcombined = shared only
 # Pdunique2 = pdcombined - pd1
 # Pdunique1 = pdcombined - pd2
-
 
 
 betafunc <- function (i, j, test,sharkphy)
@@ -219,7 +217,7 @@ resfinal=as.data.frame(do.call(rbind, res))
 #see betapart: an R package for the study of beta diversity
 #Baselga and Orme MEE
 
-#correlate the two 
+#correlate the two #two what?
 sorenson_manual <- as.data.frame(resfinal[,c("cellid1", "cellid2", "sorenson.pd.PD")])
 head(sorenson_manual)
 sorenson <- phylo.beta.pair(test, sharkphy, index.family="sorensen")
