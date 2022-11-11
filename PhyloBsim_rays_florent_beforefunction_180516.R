@@ -3,18 +3,17 @@ library(dplyr)
 #install.packages("dplyr")
 library(reshape2)
 library(betapart)
+library(here)
 #beta part package
 
-?curve
-
-#LOAD UP THE TREE FROM CHRIS, THIS HAS 100 SPECIES
+#LOAD UP THE TREE FROM CHRIS, THIS HAS 100 trees
 #sharkphy1 <- read.nexus("C:/C.drive/Chapter 4/PhylogenyChris/100.Shark.Tree.nex")
 #class(sharkphy1) #has 100 trees to account for the uncertainty
 #write.tree(sharkphy1, "C:/C.drive/Chapter 4/PhylogenyChris/sharknew")   # newick format
-sharkphy2 <- read.tree("C:/C.drive/Chapter 4/PhylogenyChris/sharknew")
+sharkphy2 <- read.tree("data/sharknew")
 sharkphy_one<-sample(sharkphy2,size=1)[[1]]
-write.tree(sharkphy_one, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew_onetree")   # newick format
-sharkphy <- read.tree("C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew_onetree")
+write.tree(sharkphy_one, "data/sharknew_onetree")   # newick format
+sharkphy <- read.tree("data/sharknew_onetree")
 
 # sharkphy1 <- read.nexus("/home/lnkdavi/100.Shark.Tree.nex")
 # #class(sharkphy1) #has 100 trees to account for the uncertainty
@@ -29,12 +28,14 @@ sharkphy <- read.tree("C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew
 #NOW THAT I HAVE DEALT WITH THE TREE MOVE ON TO CALCULATIONS,
 #THIS CODE IS SIMILAR TO SPECIESBSIM_DATA.R
 #######################################################################################################
-treehex_unfiltered <- read.csv("C:/C.drive/Chapter 4/GISfiles_ver3/GISexportfiles/SJ_Hex4DegChon_rays_forR_171005.csv") #sj file of chon and grid cells, also added the Tree names as IUCN and tree names differ because of spelling and taxonomic changes
+treehex_unfiltered <- read.csv("data/SJ_Hex4DegChon_rays_forR_171005.csv") #sj file of chon and grid cells, also added the Tree names as IUCN and tree names differ because of spelling and taxonomic changes
 #treehex_unfiltered <- read.csv("/home/lnkdavi/SJ_HexChond4Deg_withoutIUCNforR_RAYS_171005.csv")
 print(length(unique(treehex_unfiltered$TREEname)))
 head(treehex_unfiltered)
 
-treehex <- filter(treehex_unfiltered,TREEname != " " )
+treehex_unfiltered$TREEname
+
+treehex <- dplyr::filter(treehex_unfiltered,TREEname != " " )
 #remove the species that don't match Chris's phylogeny list (SppList_170926-CGM.csv)
 treehex <- filter(treehex_unfiltered,TREEvalue == 1 )
 unique(treehex$TREEvalue)
@@ -70,8 +71,8 @@ sharkphy <- combined$phy
 wide <-combined$comm
 head(wide)
 length(wide)
-write.tree(sharkphy, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays_nopelagic/rays_onetree")   # newick format
-write.csv(wide, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays_nopelagic/rayspecieshexmatrix.csv" )
+write.tree(sharkphy, "data/rays_onetree")   # newick format
+write.csv(wide, "data/rayspecieshexmatrix.csv" )
 
 #widematch <- combined$comm
 #all.equal(rownames(combined$comm), rownames(combined$phy))
@@ -102,7 +103,7 @@ pdpercell$cellid <- rownames(pdpercell)
 dim(pdpercell) #10
 str(pdpercell)
 head(pdpercell)
-write.csv(pdpercell,"C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays_nopelagic/rays_pdpercell.csv")
+write.csv(pdpercell,"data/rays_pdpercell.csv")
 
 #Create a vector of every cell combination
 cell1 <- pdpercell$cellid
@@ -112,9 +113,11 @@ dim(cellcombo) #100 combinations of the cells.
 colnames(cellcombo) <-c("cell1", "cell2")
 dim(cellcombo)
 #cellcombotest <- cellcombo[c(1:10),]
-write.csv(cellcombo, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays_nopelagic/cellcombotest_ray.csv" )
+write.csv(cellcombo, "data/cellcombotest_ray.csv" )
 #write.csv(cellcombo, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/cellcombo.csv" )
 
+
+#I believe this is all for creating a bunch of files to iterate over. Not sure I need this over. I used this when I sent jobs to the server. 
 #create a vector of cellid values
 #should be 6,082 cells long
 #608+608+608+608+608+608+608+608+608+610
@@ -133,12 +136,20 @@ head(cellcombo)
 tail(uniquecell2)
 addone<-3778
 uniquecell <-rbind(uniquecell2, addone)
+head(uniquecell)
+tail(uniquecell)
 
-308*9+310
-
-uniquecell$group <- rep(1:12,c(308,308,308,308,308,308,308,308,308,308,308,42)) 
+308*10+310 #waht is this???
+#trying to get to 3199??
+#original
+#uniquecell$group <- 
+#  rep(1:12,c(308,308,308,308,308,308,308,308,308,308,308,42))  #why 12 groups? what is this?
+uniquecell$group <- 
+  rep(1:11,c(308,308,308,308,308,308,308,308,308,308,119))  #why 12 groups? what is this?
+dim(uniquecell)
 head(uniquecell)
 names(uniquecell) <- c("cellid1", "group")
+
 #match this to cellcombo, then split based on the group. 
 head(cellcombo)
 head(uniquecell)
@@ -146,7 +157,7 @@ cellcombo_grouped<- inner_join(cellcombo, uniquecell, by = c("cell1" = "cellid1"
 head(cellcombo_grouped)
 jobid <- split(cellcombo_grouped, cellcombo_grouped$group) 
 
-lapply(names(jobid), function(x){write.csv(jobid[[x]], file = paste0("C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays_nopelagic/cellcombo_rays_jobid/rayscellcombo_", x, ".csv"), row.names=FALSE)})
+lapply(names(jobid), function(x){write.csv(jobid[[x]], file = paste0("output/rayscellcombo_", x, ".csv"), row.names=FALSE)})
 
 #and pdcombined, which is the shared
 #i added the cell id values here
