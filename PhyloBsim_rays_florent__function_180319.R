@@ -1,5 +1,10 @@
 library(picante) #READ.NEXUS FUNCTION
 library(dplyr)
+library(data.table) #fwrite
+
+
+#I think this is to calculate pairwise pd (pBsim) and Bsim for all cell combinations for sharks and rays. 
+#I think this is to calculate pairwise pd (pBsim) and Bsim for all cell combinations for sharks and rays. 
 
 # #GET JOB ID FROM THE .SH FILE
 # args <- commandArgs(trailingOnly = TRUE)
@@ -8,34 +13,42 @@ library(dplyr)
 # 
 #cellcombo
 args =2
-head(cellcombo)
-dim(cellcombo)
-allcombo <- cellcombo
-dim(allcombo)
+# head(cellcombo)
+# dim(cellcombo)
+# allcombo <- cellcombo
+# dim(allcombo)
 
-cellcombo2 <- read.csv("C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays/cellcombo_rays_jobid/rayscellcombo_1.csv")
+cellcombo2 <- read.csv("/Users/ldigity/C.drive/Chapter 4/Routputfiles_florent_180222/sharksandrays/allsp_cellcombo.csv")
+#cellcombo2 <- read.csv("C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays/cellcombo_rays_jobid/rayscellcombo_1.csv")
 head(cellcombo2)
 dim(cellcombo2) #3,697,856
 cellcombo <- cellcombo2
+head(cellcombo)
 #cellcombo2 <- read.csv(file.path(paste0("C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays_test/rayscellcombo_",args, ".csv")))
 # #cellcombo <- cellcombo2[1:50,]
 # head(cellcombo2) #7 unique ell ids.
 # dim(cellcombo2)
 # 
+# cellcombo <- cellcombo2[,c(-1,-4)]
+# head(cellcombo)
+# dim(cellcombo)
+# str(cellcombo)
+# cellcombo$cell1 <- as.factor(cellcombo$cell1)
+# cellcombo$cell2 <- as.factor(cellcombo$cell2)
 
 #LOAD DATABASES
 #species matrix
-test3 <- read.csv("C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays/rayspecieshexmatrix.csv")
+test3 <- read.csv("data/rayspecieshexmatrix.csv")
 head(test3)
 dim(test3) #6082
 #test4 <- filter(test3, test3$Unique_ID  %in%  cellcombo$cell1 |
 #                  test3$Unique_ID %in%  cellcombo$cell2)
 rownames(test3) <- test3$Unique_ID
 test3[is.na(test3)] <-0
-test5 <- test3[,c(-1,-2)]
-head(test5)
-dim(test5)
-str(test5)
+test <- test3[,c(-1,-2)]
+head(test)
+dim(test)
+str(test)
 # dim(test4)
 # test <- test4[1:10, ]
 # dim(test)
@@ -49,13 +62,14 @@ str(test5)
 # head(test)
 
 #pdpercell
-pdpercell3 <- read.csv("C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays/rays_pdpercell.csv")
+pdpercell3 <- read.csv("data/rays_pdpercell.csv") #where does this come from?
 head(pdpercell3)
 pdpercell2 <- pdpercell3[, -1]
 rownames(pdpercell2) <- pdpercell2$X
 head(pdpercell2)
 dim(pdpercell2)
 str(pdpercell2)
+head(pdpercell2)
 pdpercell2$cellid <- as.factor(pdpercell2$cellid)
 #pdpercell_test <- filter(pdpercell2, pdpercell2$cellid  %in%  cellcombo$cell1 |
 #                  pdpercell2$cellid %in%  cellcombo$cell2)
@@ -67,7 +81,7 @@ pdpercell$cellid <- as.character(pdpercell$cellid)
 str(pdpercell)
 
 #tree
-sharkphy <- read.tree("C:/C.drive/Chapter 4/Routputfiles_florent_180222/rays/rays_onetree")
+sharkphy <- read.tree("data/rays_onetree")
 
 # #Create a vector of every cell combination
 # dim(pdpercell)
@@ -117,7 +131,7 @@ betafunc <- function (pdpercell, i, j, test,sharkphy)
   simpson = min.pd/(min.pd + pd.shared) #b/(b+a)
   sorenson = (pd.sum/(2*pd.shared +pd.sum))#b+c/(2a+b+c) 
   holt = (1-(pd.shared / (min.pd + pd.shared))) 
-  beta=c(site1=i,site2=j,cellid1 = as.numeric(pdpercell[i,3]), cellid2 = as.numeric(pdpercell[j,3]), 
+  beta=c(site1=i,site2=j,cellid1 = as.numeric(pdpercell[i,"cellid"]), cellid2 = as.numeric(pdpercell[j,"cellid"]), 
          pd.sum=pd.sum, pd.combined=pd.combined,
          min.pd= min.pd, 
          simpson.pd=simpson["PD"],sorenson.pd=sorenson["PD"], holt = holt)
@@ -131,17 +145,17 @@ betafunc <- function (pdpercell, i, j, test,sharkphy)
 populate=function(k,cellcombo,pdpercell, test,sharkphy){
   betafunc(pdpercell, i=cellcombo[k,1],  j=cellcombo[k,2], test,sharkphy)  
 }
-  
+
 #then define a function that applys pdsumfunc over n number of combination
 #is this were we define the number of iterations per job?
 
 head(cellcombo)
 dim(cellcombo)
 str(cellcombo)
-cellcombo <- cellcombo[,-3]
+cellcombo <- cellcombo[,c("cell1", "cell2")]
 cellcombo$cell1 <- as.factor(cellcombo$cell1)
 cellcombo$cell2 <- as.factor(cellcombo$cell2)
-
+head(cellcombo)
 head(pdpercell)
 length(unique(pdpercell$cellid))
 dim(pdpercell)
@@ -151,12 +165,18 @@ dim(test)
 head(test)
 str(test)
 
+cellcombo <- cellcombo[1:10,]
+head(cellcombo)
 #res=lapply(1:dim(cellcombo_jobid),populate,cellcombo,pdpercell,test,sharkphy)
 res=lapply(1:nrow(cellcombo),populate,cellcombo,pdpercell,test,sharkphy)
 class(res)
+head(res)
 resfinal=as.data.frame(do.call(rbind, res))
 head(resfinal)
 class(resfinal)
+#CEDAR
+#fwrite(resfinal, file = paste0("/home/lnkdavi/rays_180316/rays_betadiv_jobid", s, ".csv"))
+fwrite(resfinal, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/test.csv")
 
 
 
