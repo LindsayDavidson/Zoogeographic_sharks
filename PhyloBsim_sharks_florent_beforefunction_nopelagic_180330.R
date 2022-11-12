@@ -10,10 +10,10 @@ library(betapart)
 #class(sharkphy1) #has 100 trees to account for the uncertainty
 #write.tree(sharkphy1, "C:/C.drive/Chapter 4/PhylogenyChris/sharknew")   # newick format
 #this was tree number 1
-sharkphy2 <- read.tree("C:/C.drive/Chapter 4/PhylogenyChris/sharknew")
+sharkphy2 <- read.tree("data/sharknew")
 sharkphy_one<-sample(sharkphy2,size=1)[[1]]
-write.tree(sharkphy_one, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew_onetree")   # newick format
-sharkphy <- read.tree("C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew_onetree")
+write.tree(sharkphy_one, "data/sharknew_onetree")   # newick format
+sharkphy <- read.tree("data/sharknew_onetree")
 
 # #tree two
 # sample(2:100, 1) #sub2 was 3
@@ -37,23 +37,12 @@ sharkphy <- read.tree("C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew
 # write.tree(sharkphy_sub4, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew_fourthsubset")   # newick format
 # sharkphyfourth <- read.tree("C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharknew_fourthsubset")
 
-################################################
-#CEDAR code
-#################################################
-# sharkphy1 <- read.nexus("/home/lnkdavi/100.Shark.Tree.nex")
-# #class(sharkphy1) #has 100 trees to account for the uncertainty
-# write.tree(sharkphy1, "/home/lnkdavi/sharknew")   # newick format
-# sharkphy2 <- read.tree("/home/lnkdavi/sharknew")
-# #subset the database for one tree
-# # sharkphy2
-# # class(sharkphy2)
-# sharkphy<-sample(sharkphy2,size=1)[[1]]
 
 #######################################################################################################
 #NOW THAT I HAVE DEALT WITH THE TREE MOVE ON TO CALCULATIONS,
 #THIS CODE IS SIMILAR TO SPECIESBSIM_DATA.R
 #######################################################################################################
-treehex_unfiltered <- read.csv("C:/C.drive/Chapter 4/GISfiles_ver3/GISexportfiles/SJ_Hex4DegChon_sharks_forR_171005.csv") #sj file of chon and grid cells, also added the Tree names as IUCN and tree names differ because of spelling and taxonomic changes
+treehex_unfiltered <- read.csv("data/SJ_Hex4DegChon_sharks_forR_171005.csv") #sj file of chon and grid cells, also added the Tree names as IUCN and tree names differ because of spelling and taxonomic changes
 #treehex_unfiltered <- read.csv("/home/lnkdavi/SJ_HexChond4Deg_withoutIUCNforR_RAYS_171005.csv")
 print(length(unique(treehex_unfiltered$TREEname))) #474 species
 head(treehex_unfiltered)
@@ -68,7 +57,7 @@ print(length(unique(treehex$Unique_ID))) #number of grid cells 9452 grid cells
 ###################################
 #get rid of pelagic species
 ##################################
-pelagic<- read.csv("C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharks_nopelagic/pelagic.shark.list.csv")
+pelagic<- read.csv("data/pelagic.shark.list.csv")
 head(pelagic)
 pel2 <- pelagic[,c("genus_name", "species_na")]
 pel2$name <- paste0(pel2$genus_name,"_", pel2$species_na)
@@ -103,8 +92,10 @@ dim(widematch) #451
 widematch[1:2,1:2]
 test <- widematch
 
-write.tree(sharkphy, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharks_nopelagic/sharks_onetree")   # newick format
-write.csv(widematch, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharks_nopelagic/sharkwide_match.csv")   # newick format
+write.tree(sharkphy, "data/sharks_nopelagic_onetree")   # newick format
+write.csv(widematch, "data/sharkwide_nopelagic_match.csv")   # newick format
+# write.tree(sharkphy, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharks_nopelagic/sharks__onetree")   # newick format
+# write.csv(widematch, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharks_nopelagic/sharkwide_match.csv")   # newick format
 
 ###################################
 #PD per cell
@@ -118,6 +109,7 @@ str(pdpercell)
 head(pdpercell)
 #pdpercell <- filter(pdpercell, SR!=0) #cellid 7150 has no species removed
 write.csv(pdpercell, "C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharks_nopelagic/pdpercell_sharks.csv" )
+write.csv(pdpercell, "data/pdpercell_sharks.csv" )
 # pdpercell_read <- read.csv("C:/C.drive/Chapter 4/Routputfiles_florent_180222/sharks/pdpercell_sharks.csv")
 
 ################################################
