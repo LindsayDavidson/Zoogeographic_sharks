@@ -5,12 +5,13 @@ library(ggtree)
 #install.packages("geiger")
 library(geiger)
 library(reshape2)
+library(here)
 
 # install.apackages("ggtree")
 # source("https://bioconductor.org/biocLite.R")
 # biocLite("ggtree")
 
-sharkphy1 <- read.nexus("C:/C.drive/Chapter 4/PhylogenyChris/100.Shark.Tree.nex")
+sharkphy1 <- read.nexus("data/100.Shark.Tree.nex")
 class(sharkphy1) 
 sharkphy2 <- read.tree("C:/C.drive/Chapter 4/PhylogenyChris/sharknew")
 sharkphy_one<-sample(sharkphy2,size=1)[[1]]
